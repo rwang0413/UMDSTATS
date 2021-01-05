@@ -1,0 +1,25 @@
+{
+    "name": "UMDStats",
+    "version": "1.0",
+    "manifest_version": 2,
+    "content_scripts": [
+        {
+            "matches": ["https://app.testudo.umd.edu/soc/*"],
+            "js": ["content.js"]
+        }
+
+    ],
+
+    "permissions": [
+      "https://api.planetterp.com/v1/*",
+      "https://planetterp.com/professor/*"
+    ],
+
+    "background": {
+		"scripts": ["background.js"],
+		"persistent": false
+	}
+
+    
+
+}
