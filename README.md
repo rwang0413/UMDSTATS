@@ -10,7 +10,13 @@ The following is a link to the extension on the Google Web Store. (If it's not h
   
 Below you can find some pictures of the extension in action!  
   
-  
+    
+      
+      
+      
+      
+      
+      
 ![Screenshot](reviews.png). 
   
   
