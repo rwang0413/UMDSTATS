@@ -39,7 +39,7 @@ function sleep(ms) {
 
 
 
-// Checks if a planetterp review url link is correct
+// Checks if a PlanetTerp review url link is correct
 function validReviewsUrl(urls, firstName) {
     return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
@@ -61,8 +61,8 @@ function validReviewsUrl(urls, firstName) {
 
 
 
-// generates both url for planetterp's api and the professor's review page
-// on planetterp
+/* Generates both url for planetterp's api and the professor's review page
+   on planetterp */
 async function generateUrls(fullName) {
     let ret = {api: 'https://api.planetterp.com/v1/professor?name=',
                reviews: ''
@@ -169,7 +169,9 @@ function fetchData() {
 
 
 
-// injects rating into html
+/* This function will fill in the stars based off the number-rating is contains. It's important
+to note that if the instructor doesn't exist or have any reviews, no stars are filled in.
+In addition, this function modifies CSS of the stars of each instructor. */
 function addRating(instructor, metadata) {
 
     /* Rating is out of 5 stars */
