@@ -1,3 +1,5 @@
+
+window.addEventListener ("load", addGPA, false);
 /* Adding the font 'Font Awesome' to the page! */
 var my_awesome_script = document.createElement('link');
 
@@ -11,13 +13,13 @@ var currIndex = 0;
 let instructorsData = new Map();
 
 if (document.getElementsByClassName("section-instructors").length > 0) {
-    fetchRating();
+    fetchData();
 }
 else {
     var buttons = document.getElementsByClassName("toggle-sections-link");
 
     for(var i=0; i<buttons.length; i++){
-        buttons[i].addEventListener("click", fetchRating);
+        buttons[i].addEventListener("click", fetchData);
     }
 }
 
@@ -84,7 +86,7 @@ function alreadyProcessed(names) {
 }
 
 // fetches instructor data
-function fetchRating() {
+function fetchData() {
     sleep(500).then(async () => {
 
         // testing purposes
@@ -131,7 +133,7 @@ function fetchRating() {
                         }
                         let data = {hyperlink: ratingHTML, rating: avgRating};
                         instructorsData.set(instructors[i].innerText, data);
-                        injectRating(instructors[i], data);
+                        addRating(instructors[i], data);
                         
                         console.log("fetching...");
                         console.timeEnd("function" +tempi);
@@ -139,7 +141,7 @@ function fetchRating() {
                     }
                 else {
                     console.log("adding from map");
-                    injectRating(instructors[i], instructorsData.get(instructors[i].innerText));
+                    addRating(instructors[i], instructorsData.get(instructors[i].innerText));
                     
                     console.timeEnd("function" +i);
                 }
@@ -149,7 +151,7 @@ function fetchRating() {
 }
 
 // injects rating into html
-function injectRating(instructor, metadata) {
+function addRating(instructor, metadata) {
 
     /* Rating is out of 5 stars */
     const starsTotal = 5;
@@ -165,4 +167,59 @@ function injectRating(instructor, metadata) {
     document.getElementById("ratings" + currIndex).getElementsByClassName("stars-inner")[0].style.width = starPercentage + '%';
                     
     currIndex++;
+}
+
+function addGPA () {
+   console.log("Running addGPA");
+   let classes = document.getElementsByClassName('course-id');
+   
+   for (let x = 0; x < classes.length; x++) {
+        tempURL = '';
+        tempURL = classURL + classes[x].innerText;
+
+        let qualityPoints = 0;
+        let numStudents = 0;
+
+        fetch('https://api.planetterp.com/v1/grades?professor?&course=' + classes[x].innerText + '&section?')
+        
+        .then(function(res) {
+
+            /* This returns a list of arrays, each array having the grades of a section */
+            return res.json();
+        }).then(function(body) {
+
+            /* Calculates the qualityPoints and numStudents from all the sections */
+            for (var sectionIndex = 0; sectionIndex < body.length; sectionIndex++) {
+                var numAPlus = body[sectionIndex]['A+'];
+                var numA = body[sectionIndex]['A'];
+                var numAMinus = body[sectionIndex]['A-'];
+                var numBPlus = body[sectionIndex]['B+'];
+                var numB = body[sectionIndex]['B'];
+                var numBMinus = body[sectionIndex]['B-'];
+                var numCPlus = body[sectionIndex]['C+'];
+                var numC = body[sectionIndex]['C'];
+                var numCMinus = body[sectionIndex]['C-'];
+                var numDPlus = body[sectionIndex]['D+'];
+                var numD = body[sectionIndex]['D'];
+                var numDMinus = body[sectionIndex]['D-'];
+                var numF = body[sectionIndex]['F'];
+                var numW = body[sectionIndex]['W'];
+
+                numStudents = numStudents + numAPlus + numA + numAMinus + numBPlus + numB + numBMinus + numCPlus + numC + numCMinus + numDPlus + numD + numDMinus + numF + numW;
+                qualityPoints = qualityPoints + (numAPlus * 4) + (numA * 4) + (numAMinus * 3.7) + (numBPlus * 3.3) + (numB * 3.0) + (numBMinus * 2.7) + (numCPlus * 2.3) + (numC * 2.0) + (numCMinus * 1.7) + (numDPlus * 1.3) + (numD * 1.0) + (numDMinus * 0.7) + (numF * 0) + (numW * 0);
+            }
+            
+            if (numStudents != 0) {
+                var averageGPA = qualityPoints/numStudents;
+                var roundedAvgGPA = Math.ceil(averageGPA * 100) / 100;
+
+                classes[x].innerHTML = classes[x].innerHTML + "<br> GPA: " + roundedAvgGPA;
+
+            } else {
+                classes[x].innerHTML = classes[x].innerHTML + "<br> <br> <br> GPA: N/A";
+            }
+        
+            
+        });
+  }  
 }
