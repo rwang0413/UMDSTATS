@@ -1,21 +1,28 @@
-
+/* This will run addGPA() once page loads */
 window.addEventListener ("load", addGPA, false);
+
+
 /* Adding the font 'Font Awesome' to the page! */
-var my_awesome_script = document.createElement('link');
+var getFont = document.createElement('link');
+getFont.setAttribute('href',"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css");
+getFont.setAttribute('rel', "stylesheet");
 
-my_awesome_script.setAttribute('href',"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css");
-my_awesome_script.setAttribute('rel', "stylesheet");
+document.head.appendChild(getFont);
 
-document.head.appendChild(my_awesome_script);
 
+/* These global variables are used to assign unique ids to each professor and course */
 var currIndex = 0;
+var sectionIndex = 0;
 
 let instructorsData = new Map();
 
+
+
 if (document.getElementsByClassName("section-instructors").length > 0) {
     fetchData();
-}
-else {
+} else {
+    /* Intialize all buttons with a listener, such that when "Show Section", is
+    clicked, the function, addRating is executed. */
     var buttons = document.getElementsByClassName("toggle-sections-link");
 
     for(var i=0; i<buttons.length; i++){
@@ -23,9 +30,13 @@ else {
     }
 }
 
+
+
+/* Causes a pause depending on argument, ms. Note: 1000ms = 1s */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 
 
 // Checks if a planetterp review url link is correct
@@ -47,6 +58,8 @@ function validReviewsUrl(urls, firstName) {
         });
     });
 }
+
+
 
 // generates both url for planetterp's api and the professor's review page
 // on planetterp
@@ -73,6 +86,8 @@ async function generateUrls(fullName) {
     return ret;
 }
 
+
+
 // Checks if the instructor has been processed prior
 function alreadyProcessed(names) {
     if (instructorsData.has(names[0] + " " + names[1])) {
@@ -84,6 +99,8 @@ function alreadyProcessed(names) {
 
     return false;
 }
+
+
 
 // fetches instructor data
 function fetchData() {
@@ -150,6 +167,8 @@ function fetchData() {
     })
 }
 
+
+
 // injects rating into html
 function addRating(instructor, metadata) {
 
@@ -169,6 +188,12 @@ function addRating(instructor, metadata) {
     currIndex++;
 }
 
+
+
+/* This function displays the average GPA of a course. If the course is invalid or there is no grade data
+on the course, this function will display N/A. It first uses PlanetTerps API to retrieve the grade data
+of a specific course and then calculates the avergae GPA based off the data using UMD GPA grade scale.
+It's important to note that this function inserts html and also modifies the css corresponding to the html. */
 function addGPA () {
    console.log("Running addGPA");
    let classes = document.getElementsByClassName('course-id');
@@ -207,14 +232,42 @@ function addGPA () {
                 qualityPoints = qualityPoints + (numAPlus * 4) + (numA * 4) + (numAMinus * 3.7) + (numBPlus * 3.3) + (numB * 3.0) + (numBMinus * 2.7) + (numCPlus * 2.3) + (numC * 2.0) + (numCMinus * 1.7) + (numDPlus * 1.3) + (numD * 1.0) + (numDMinus * 0.7) + (numF * 0) + (numW * 0);
             }
             
+            /* There is grade data available for this course */
             if (numStudents != 0) {
                 var averageGPA = qualityPoints/numStudents;
+                
+                /* Rounds GPA to the nearest hundreth place */
                 var roundedAvgGPA = Math.ceil(averageGPA * 100) / 100;
 
-                classes[x].innerHTML = classes[x].innerHTML + "<br> GPA: " + roundedAvgGPA;
+                var color = "";
 
+
+                /* Determine the color of the circle based of the GPA */
+                if (roundedAvgGPA >= 3.5) {
+                    /* Green for As*/
+                    color = '#2CE574';
+                } else if (roundedAvgGPA >= 2.85 && roundedAvgGPA < 3.5) {
+                    /* Light Green for Bs */
+                    color = '#CDF03A';
+                } else if (roundedAvgGPA >= 1.7 && roundedAvgGPA < 2.85) {
+                    /* Yellow For Cs */
+                    color = '#fff700';
+                } else {
+                    /* Red for Fs/Ws/etc */
+                    color = '#FF3924'
+                }
+ 
+               
+
+               /* Inserting html and then modifying the color of the circle */
+                classes[x].innerHTML = classes[x].innerHTML + '<br> <br> <div class="circle" id="courseColor' + courseIndex + '">GPA: '+ roundedAvgGPA + '</div>';
+                document.getElementById("courseColor" + courseIndex).style.background = color;
+                courseIndex++;
+            
+                
+            /* No grade data for this course */
             } else {
-                classes[x].innerHTML = classes[x].innerHTML + "<br> <br> <br> GPA: N/A";
+                classes[x].innerHTML = classes[x].innerHTML + "<br> <br> GPA: N/A";
             }
         
             
