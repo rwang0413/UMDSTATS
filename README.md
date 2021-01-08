@@ -1,4 +1,4 @@
-# NAME OF EXTENSION GOES HERE
+# UMDStats
 
 This Google Chrome extension uses the PlanetTerp API to request information about a professor/course. It will then display the info on the UMD Schedule of Classes page. The average rating of the professor/course is displayed. A hyperlink will also appear, which links to reviews of the professor, if they exist on PlanetTerp.
 <br/>
