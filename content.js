@@ -39,10 +39,12 @@ function sleep(ms) {
 
 
 
-// Checks if a PlanetTerp review url link is correct
+/* Checks if a PlanetTerp review url link is correct by checking if the body
+   text
+*/
 function validReviewsUrl(urls, firstName) {
     return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage({
+        chrome.runtime.sendMessage({ // getting text content of url
             url: urls.reviews,
             type: "text"
         }, function(response) {
@@ -99,9 +101,11 @@ function alreadyProcessed(names) {
 
 
 
-/* Comment through this method plus describe */
+/* Fetches instructor rating data from planetterp's api and saves it in 
+   a map to prevent redundant fetches.
+*/
 function fetchData() {
-    sleep(500).then(async () => {
+    sleep(750).then(async () => {
 
         let instructors = document.getElementsByClassName("section-instructors");
 
@@ -110,21 +114,21 @@ function fetchData() {
             let urls;
             let names = instructors[i].innerText.split(' ');
 
-                
-            
+            // Checks if instructor has a rating added already
             if (names.length <= 3) {
-                if (!alreadyProcessed(names)){
-                    urls = await generateUrls(names);
+                if (!alreadyProcessed(names)){ // Checks if data is in map
+                    urls = await generateUrls(names);  // review and api url
 
+                    // Calls background script to get json data
                     chrome.runtime.sendMessage({
                         url: urls.api,
                         type: "json"
                     }, function (response) {
-                        let tempi = i;
                         let ratingHTML = "<a href=" + urls.reviews + ">Rating: ";
                         let avgRating = 0;
                         if (response.error !== 'professor not found') {
-
+                            
+                            // finds average rating and includes # of reviews
                             if (response['reviews'].length !== 0) {
                                 response['reviews'].forEach((review) => {
                                     avgRating += review['rating'];
@@ -136,11 +140,16 @@ function fetchData() {
                                 ratingHTML += "N/A (0)</a>"; 
                             }
 
-                        } else {
+                        } else { // Professor name invalid/not found
                             ratingHTML = "Instructor was not found";
+                            avgRating = -1;
                         }
+
+                        // adding data to map
                         let data = {hyperlink: ratingHTML, rating: avgRating};
                         instructorsData.set(instructors[i].innerText, data);
+
+                        // injects rating into html
                         addRating(instructors[i], data);
                     });
 
@@ -158,7 +167,7 @@ function fetchData() {
 to note that if the instructor doesn't exist or have any reviews, no stars are filled in.
 In addition, this function modifies CSS of the stars of each instructor. */
 function addRating(instructor, metadata) {
-    if (instructor.innerText != 'TBA') {
+    if (metadata.rating != -1) { // checks if professor was found or not
        
         const starsTotal = 5;
         const starPercentage = (metadata.rating / starsTotal) * 100;
@@ -171,12 +180,9 @@ function addRating(instructor, metadata) {
 
         /* Modify the CSS of the stars to fill in the yellow */                     
         document.getElementById("ratings" + currIndex).getElementsByClassName("stars-inner")[0].style.width = starPercentage + '%';    
-        currIndex++;
-    } else {
-        instructor.innerHTML += "<br>" + metadata.hyperlink;
-        currIndex++;
     }
     
+    currIndex++;
 }
 
 
@@ -222,6 +228,10 @@ function addGPA () {
                 qualityPoints = qualityPoints + (numAPlus * 4) + (numA * 4) + (numAMinus * 3.7) + (numBPlus * 3.3) + (numB * 3.0) + (numBMinus * 2.7) + (numCPlus * 2.3) + (numC * 2.0) + (numCMinus * 1.7) + (numDPlus * 1.3) + (numD * 1.0) + (numDMinus * 0.7) + (numF * 0) + (numW * 0);
             }
             
+            /* Adds hyperlink to course name */
+            var className = classes[x].innerHTML;
+            classes[x].innerHTML = "<a href=" + "https://planetterp.com/course/" + className + ">" + className + "</a>";
+
             /* There is grade data available for this course */
             if (numStudents != 0) {
                 var averageGPA = qualityPoints/numStudents;
