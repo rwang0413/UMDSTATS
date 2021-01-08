@@ -8,15 +8,10 @@ course, with no regard to any professor, is shown.
 The following is a link to the extension on the Google Web Store. (If it's not here, we are currently waiting for it to be accepted.)  
   
   
-Below you can find a picture of the extension in action!  
-  
-    
-      
-      
-      
-      
-      
-      
+Below you can find a picture of the extension in action!<br/>
+<br/>
+<br/>
+<br/>
 ![Screenshot](reviews.png). 
   
   
