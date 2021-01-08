@@ -12,7 +12,7 @@ document.head.appendChild(getFont);
 
 /* These global variables are used to assign unique ids to each professor and course */
 var currIndex = 0;
-var sectionIndex = 0;
+var courseIndex = 0;
 
 let instructorsData = new Map();
 
