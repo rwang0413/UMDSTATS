@@ -4,7 +4,7 @@ if (document.getElementsByClassName("section-instructors").length > 0) {
     addRating();
 }
 else {
-    var buttons = document.getElementsByClassName("toggle-sections-link-text");
+    var buttons = document.getElementsByClassName("toggle-sections-link");
 
     for(var i=0; i<buttons.length; i++){
         buttons[i].addEventListener("click", addRating);
@@ -100,7 +100,6 @@ function addRating() {
                         url: urls.api,
                         type: "json"
                     }, function (response) {
-                        console.log(avgRating);
                         let rating = "<a href=" + urls.reviews + ">Rating: ";
                         if (response.error !== 'professor not found') {
 
