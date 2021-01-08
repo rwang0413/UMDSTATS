@@ -51,8 +51,7 @@ function validReviewsUrl(urls, firstName) {
             if (response === "Professor not found.") {
                 urls.reviews = urls.reviews + "_" + firstName;
                 resolve();
-            }
-            else {
+            } else {
                 resolve();
             }
         });
@@ -74,8 +73,7 @@ async function generateUrls(fullName) {
         if(i === fullName.length - 1) {
             ret.api += fullName[i] + '&reviews=true';
             ret.reviews = "https://planetterp.com/professor/" + fullName[i];
-        }
-        else {
+        } else {
             ret.api += fullName[i] + '%20';
         }
     }
@@ -92,8 +90,7 @@ async function generateUrls(fullName) {
 function alreadyProcessed(names) {
     if (instructorsData.has(names[0] + " " + names[1])) {
         return true;
-    }
-    else if (instructorsData.has(names[0] + " " + names[1] + " " + names[2])) {
+    } else if (instructorsData.has(names[0] + " " + names[1] + " " + names[2])) {
         return true;
     }
 
@@ -102,23 +99,19 @@ function alreadyProcessed(names) {
 
 
 
-// fetches instructor data
+/* Comment through this method plus describe */
 function fetchData() {
     sleep(500).then(async () => {
-
-        // testing purposes
-        console.log("Executing addRating...");
 
         let instructors = document.getElementsByClassName("section-instructors");
 
         for (let i = 0; i < instructors.length; i++) {
-            console.time("function" + i);
+            
             let urls;
             let names = instructors[i].innerText.split(' ');
 
                 
-            // Don't think this is a good way to test if a prior rating was injected
-            // but using it for convenience now
+            
             if (names.length <= 3) {
                 if (!alreadyProcessed(names)){
                     urls = await generateUrls(names);
@@ -136,31 +129,23 @@ function fetchData() {
                                 response['reviews'].forEach((review) => {
                                     avgRating += review['rating'];
                                 })
+                                
                                 avgRating = (avgRating / response['reviews'].length).toFixed(2);
                                 ratingHTML += avgRating + " (" + response['reviews'].length + ")" + "</a>";
-                            }
-                            else  {
+                            } else {
                                 ratingHTML += "N/A (0)</a>"; 
                             }
-                        }
-                        else{
 
-                            // debugging purposes
+                        } else {
                             ratingHTML = "Instructor was not found";
                         }
                         let data = {hyperlink: ratingHTML, rating: avgRating};
                         instructorsData.set(instructors[i].innerText, data);
                         addRating(instructors[i], data);
-                        
-                        console.log("fetching...");
-                        console.timeEnd("function" +tempi);
                     });
-                    }
-                else {
-                    console.log("adding from map");
+
+                } else {
                     addRating(instructors[i], instructorsData.get(instructors[i].innerText));
-                    
-                    console.timeEnd("function" +i);
                 }
             }
         }
@@ -173,21 +158,25 @@ function fetchData() {
 to note that if the instructor doesn't exist or have any reviews, no stars are filled in.
 In addition, this function modifies CSS of the stars of each instructor. */
 function addRating(instructor, metadata) {
+    if (instructor.innerText != 'TBA') {
+       
+        const starsTotal = 5;
+        const starPercentage = (metadata.rating / starsTotal) * 100;
 
-    /* Rating is out of 5 stars */
-    const starsTotal = 5;
+        /* Injection of HTML for the stars */
+        var starHTML = '<div id="ratings' + currIndex + '"> ' + '<div class="stars-outer"> <div class="stars-inner"></div> </div> <span class="number-rating"></span> </div>'; 
 
-    /* Percentage of stars filled up */
-    const starPercentage = (metadata.rating / starsTotal) * 100;
+    
+        instructor.innerHTML += "<br>" + metadata.hyperlink + starHTML;
 
-    var starHTML = '<div id="ratings' + currIndex + '"> ' + '<div class="stars-outer"> <div class="stars-inner"></div> </div> <span class="number-rating"></span> </div>'; 
-
-    instructor.innerHTML += "<br>" + metadata.hyperlink + starHTML;
-
-    // Set width of stars-inner to percentage. Draws the yellow part.                     
-    document.getElementById("ratings" + currIndex).getElementsByClassName("stars-inner")[0].style.width = starPercentage + '%';
-                    
-    currIndex++;
+        /* Modify the CSS of the stars to fill in the yellow */                     
+        document.getElementById("ratings" + currIndex).getElementsByClassName("stars-inner")[0].style.width = starPercentage + '%';    
+        currIndex++;
+    } else {
+        instructor.innerHTML += "<br>" + metadata.hyperlink;
+        currIndex++;
+    }
+    
 }
 
 
@@ -197,7 +186,6 @@ on the course, this function will display N/A. It first uses PlanetTerps API to 
 of a specific course and then calculates the avergae GPA based off the data using UMD GPA grade scale.
 It's important to note that this function inserts html and also modifies the css corresponding to the html. */
 function addGPA () {
-   console.log("Running addGPA");
    let classes = document.getElementsByClassName('course-id');
 
    for (let x = 0; x < classes.length; x++) {
