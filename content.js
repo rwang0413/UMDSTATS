@@ -1,13 +1,23 @@
-let instructorMap = new Map();
+/* Adding the font 'Font Awesome' to the page! */
+var my_awesome_script = document.createElement('link');
+
+my_awesome_script.setAttribute('href',"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css");
+my_awesome_script.setAttribute('rel', "stylesheet");
+
+document.head.appendChild(my_awesome_script);
+
+var currIndex = 0;
+
+let instructorsData = new Map();
 
 if (document.getElementsByClassName("section-instructors").length > 0) {
-    addRating();
+    fetchRating();
 }
 else {
     var buttons = document.getElementsByClassName("toggle-sections-link");
 
     for(var i=0; i<buttons.length; i++){
-        buttons[i].addEventListener("click", addRating);
+        buttons[i].addEventListener("click", fetchRating);
     }
 }
 
@@ -63,18 +73,18 @@ async function generateUrls(fullName) {
 
 // Checks if the instructor has been processed prior
 function alreadyProcessed(names) {
-    if (names.length === 2 && instructorMap.has(names[0] + " " + names[1])) {
+    if (instructorsData.has(names[0] + " " + names[1])) {
         return true;
     }
-    else if (names.length === 3 && instructorMap.has(names[0] + " " + names[1] + " " + names[2])) {
+    else if (instructorsData.has(names[0] + " " + names[1] + " " + names[2])) {
         return true;
     }
 
     return false;
 }
 
-// injects the rating of the instructor into the page
-function addRating() {
+// fetches instructor data
+function fetchRating() {
     sleep(500).then(async () => {
 
         // testing purposes
@@ -83,8 +93,7 @@ function addRating() {
         let instructors = document.getElementsByClassName("section-instructors");
 
         for (let i = 0; i < instructors.length; i++) {
-            console.log('start of i = ' + i);
-            let avgRating = 0;
+            console.time("function" + i);
             let urls;
             let names = instructors[i].innerText.split(' ');
 
@@ -92,7 +101,6 @@ function addRating() {
             // Don't think this is a good way to test if a prior rating was injected
             // but using it for convenience now
             if (names.length <= 3) {
-
                 if (!alreadyProcessed(names)){
                     urls = await generateUrls(names);
 
@@ -100,37 +108,61 @@ function addRating() {
                         url: urls.api,
                         type: "json"
                     }, function (response) {
-                        let rating = "<a href=" + urls.reviews + ">Rating: ";
+                        let tempi = i;
+                        let ratingHTML = "<a href=" + urls.reviews + ">Rating: ";
+                        let avgRating = 0;
                         if (response.error !== 'professor not found') {
 
                             if (response['reviews'].length !== 0) {
                                 response['reviews'].forEach((review) => {
                                     avgRating += review['rating'];
                                 })
-                                avgRating= (avgRating / response['reviews'].length).toFixed(2);
-                                rating = rating + avgRating + " (" + response['reviews'].length + ")" + "</a>";
+                                avgRating = (avgRating / response['reviews'].length).toFixed(2);
+                                ratingHTML += avgRating + " (" + response['reviews'].length + ")" + "</a>";
                             }
                             else  {
-                                rating = rating + "N/A (0)</a>"; 
+                                ratingHTML += "N/A (0)</a>"; 
                             }
                         }
                         else{
 
                             // debugging purposes
-                            rating = rating + "Instructor was not found";
+                            ratingHTML = "Instructor was not found";
                         }
-
-                        instructorMap.set(instructors[i].innerText, instructors[i].innerHTML + "<br>" + rating);
-                        instructors[i].innerHTML = instructors[i].innerHTML + "<br>" + rating;
+                        let data = {hyperlink: ratingHTML, rating: avgRating};
+                        instructorsData.set(instructors[i].innerText, data);
+                        injectRating(instructors[i], data);
+                        
+                        console.log("fetching...");
+                        console.timeEnd("function" +tempi);
                     });
                     }
                 else {
                     console.log("adding from map");
-                    instructors[i].innerHTML = instructorMap.get(instructors[i].innerText);
+                    injectRating(instructors[i], instructorsData.get(instructors[i].innerText));
+                    
+                    console.timeEnd("function" +i);
                 }
-                console.log('end i = ' + i);
             }
         }
     })
 }
 
+// injects rating into html
+function injectRating(instructor, metadata) {
+
+    /* Rating is out of 5 stars */
+    const starsTotal = 5;
+
+    /* Percentage of stars filled up */
+    const starPercentage = (metadata.rating / starsTotal) * 100;
+
+    var starHTML = '<div id="ratings' + currIndex + '"> ' + '<div class="stars-outer"> <div class="stars-inner"></div> </div> <span class="number-rating"></span> </div>'; 
+
+    instructor.innerHTML += "<br>" + metadata.hyperlink + starHTML;
+
+    // Set width of stars-inner to percentage. Draws the yellow part.                     
+    document.getElementById("ratings" + currIndex).getElementsByClassName("stars-inner")[0].style.width = starPercentage + '%';
+                    
+    currIndex++;
+}
