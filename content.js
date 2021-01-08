@@ -172,10 +172,8 @@ function addRating(instructor, metadata) {
 function addGPA () {
    console.log("Running addGPA");
    let classes = document.getElementsByClassName('course-id');
-   
+
    for (let x = 0; x < classes.length; x++) {
-        tempURL = '';
-        tempURL = classURL + classes[x].innerText;
 
         let qualityPoints = 0;
         let numStudents = 0;
