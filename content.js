@@ -17,9 +17,11 @@ var courseIndex = 0;
 let instructorsData = new Map();
 
 
-
+// User searched for a specific course (section already opened)
 if (document.getElementsByClassName("section-instructors").length > 0) {
     fetchData();
+    
+// Adding listerners to each show section button
 } else {
     /* Intialize all buttons with a listener, such that when "Show Section", is
     clicked, the function, addRating is executed. */
@@ -105,6 +107,8 @@ function alreadyProcessed(names) {
    a map to prevent redundant fetches.
 */
 function fetchData() {
+    
+    // temporary "fix" until there's a way to test to see if a section finished loading completely
     sleep(750).then(async () => {
 
         let instructors = document.getElementsByClassName("section-instructors");
